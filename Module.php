@@ -8,7 +8,6 @@
 namespace Aurora\Modules\TeamContactsLdap;
 
 use Aurora\Modules\Contacts;
-use Aurora\Modules\Contacts\Models\Contact;
 use Aurora\Modules\Contacts\Enums\StorageType;
 
 /**
@@ -200,7 +199,6 @@ class Module extends \Aurora\System\Module\AbstractModule
             $aMap = array_change_key_case($aMap, CASE_LOWER);
             $aItem = array_change_key_case($aItem, CASE_LOWER);
 
-            //print_r($aMap); exit();
             $sId = $aItem[$this->sUidFieldName][0];
             if (isset($sId)) {
                 $oContact = new \Aurora\Modules\Contacts\Models\Contact();
