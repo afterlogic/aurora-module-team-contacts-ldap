@@ -65,11 +65,19 @@ class Module extends \Aurora\System\Module\AbstractModule
         static $oLdap = null;
         if (null === $oLdap) {
             $oLdap = new \Aurora\System\Utils\Ldap($this->oModuleSettings->SearchDn);
+            $sBindPassword = $this->oModuleSettings->BindPassword;
+            if ($sBindPassword && !\Aurora\System\Utils::IsEncryptedValue($sBindPassword)) {
+                $this->setConfig('BindPassword', \Aurora\System\Utils::EncryptValue($sBindPassword));
+                $this->saveModuleConfig();
+            } else {
+                $sBindPassword = \Aurora\System\Utils::DecryptValue($sBindPassword);
+            }
+
             $oLdap = $oLdap->Connect(
                 $this->oModuleSettings->Host,
                 $this->oModuleSettings->Port,
                 $this->oModuleSettings->BindDn,
-                $this->oModuleSettings->BindPassword
+                $sBindPassword
             ) ? $oLdap : false;
         }
 
