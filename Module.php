@@ -201,7 +201,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
             $sId = $aItem[$this->sUidFieldName][0];
             if (isset($sId)) {
-                $oContact = new \Aurora\Modules\Contacts\Models\Contact();
+                $oContact = new \Aurora\Modules\Contacts\Classes\Contact();
                 $aContact = array(
                     'UUID' => $sId,
                     'IdUser' => $oUser->Id,
@@ -230,7 +230,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                 $aContact['ViewEmail'] = $sEmail;
                 $aContact['ItsMe'] = $sEmail === $oUser->PublicId;
 
-                $oContact->populate($aContact, true);
+                $oContact->populate($aContact);
             }
         }
 
@@ -253,7 +253,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         $this->subscribeEvent('Contacts::GetStorages', array($this, 'onGetStorages'));
         $this->subscribeEvent('Contacts::GetContacts::after', array($this, 'onAfterGetContacts'));
         $this->subscribeEvent('Contacts::GetContact::after', array($this, 'onAfterGetContact'));
-        $this->subscribeEvent('Contacts::PrepareFiltersFromStorage', array($this, 'prepareFiltersFromStorage'));
+        $this->subscribeEvent('Contacts::PrepareFiltersFromStorage', array($this, 'onPrepareFiltersFromStorage'));
     }
 
     public function onGetStorages(&$aStorages)
@@ -297,21 +297,10 @@ class Module extends \Aurora\System\Module\AbstractModule
         }
     }
 
-    public function prepareFiltersFromStorage(&$aArgs, &$mResult)
+    public function onPrepareFiltersFromStorage(&$aArgs, &$mResult)
     {
-        if (isset($aArgs['Storage']) && ($aArgs['Storage'] === StorageType::Team)) {
+        if (isset($aArgs['Storage']) && ($aArgs['Storage'] === StorageType::Team || $aArgs['Storage'] === StorageType::All)) {
             $aArgs['IsValid'] = true;
-
-            if (!isset($mResult)) {
-                $mResult = \Aurora\Modules\Contacts\Models\Contact::query();
-            }
-
-            $oUser = \Aurora\System\Api::getAuthenticatedUser();
-
-            $mResult = $mResult->orWhere(function ($query) use ($oUser) {
-                $query = $query->where('IdTenant', $oUser->IdTenant)
-                    ->where('Storage', StorageType::Team);
-            });
         }
     }
 }
